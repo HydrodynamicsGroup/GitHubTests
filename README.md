@@ -1,2 +1,2 @@
-# MushuCageTest
-Testing GitHub functionality with small programs
+# GitHubTests
+Testing GitHub functionality and workflow with small programs.
