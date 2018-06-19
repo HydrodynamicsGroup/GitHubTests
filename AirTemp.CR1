@@ -16,11 +16,11 @@
 Public PTempC 'datalogger temp
 Public AirTempC 'air temp from thermocouple in C
 Public AirTempF ' " in F
-Public MinTemp
-Public MaxTemp
+Public MaxTemp 'Max temp used as trigger to turn light on
 Public TempDiff ' difference between airtemp and logger temp in C
-Public LightOn As Boolean
-Public ManualLightOn As Boolean
+Public LightOn As Boolean 'used to indicate whether light should be on or off
+Public ManualLightOn As Boolean 'used as a manual trigger if user wants the light on even if temp isn't over threshold
+Public MaxLightOn As Boolean 'flag to indicate the light is on due to the max threshold
 
 'Define Data Tables.
 DataTable (Temp,True,-1 )
@@ -33,27 +33,45 @@ DataTable (Temp,True,-1 )
 EndTable 
 
 'Define Subroutines
+'_________________________Get the Air Temp from the Thermocouple_________________
 Sub (GetAirTemp)
   TCDiff (AirTempC,1,AutoRange,1,TypeK,PTempC,True ,0,_60Hz,1.0,0)
 EndSub
-  
+
+'___________________Calculate Temp F from Thermocouple data ________________________  
 Sub CalcF
   AirTempF = AirTempC * 1.8 + 32
 EndSub
 
+'_____________________Calculate difference between Datalogger panel temp and air temp__________________
 Sub CalcDiff
   TempDiff = AirTempC - PTempC
 EndSub
 
+'_____________________Turn the light on based on the temp threshold______________________________
 Sub TurnLightOn
   If AirTempF >= MaxTemp Then
     PortSet (9,1)
+    MaxLightOn = True
     LightOn = True
     Else
     PortSet (9,0)
-      LightOn = False
+    MaxLightOn = False
+    LightOn = False
   EndIf
 EndSub
+
+'_________________________Turn the light on based on the user flipping the switch______________________
+Sub ManLightOn
+  If ManualLightOn = True Then
+    PortSet(9,1)
+    LightOn = True
+  ElseIf ManualLightOn = False AND MaxLightOn = False Then
+    PortSet(9,0)
+    LightOn = False
+  EndIf
+EndSub
+  
 
 'Main Program
 BeginProg
@@ -64,6 +82,7 @@ BeginProg
 		Call CalcF
 		Call CalcDiff
 		Call TurnLightOn
+		Call ManLightOn
 		'Enter other measurement instructions
 		'Call Output Tables
 		'Example:
