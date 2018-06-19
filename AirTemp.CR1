@@ -1,0 +1,73 @@
+'For programming tips, copy this address to your browser
+'search window:https:https://www.campbellsci.com/videos/datalogger-programming
+
+'CR1000 Series Datalogger
+'To create a different opening program template, type in new
+'instructions and select Template | Save as Default Template
+'Date:
+'Program author:
+
+'Declare Constants
+'Example:
+'CONST PI = 3.141592654 or Const PI = 4*ATN(1)
+
+'Declare Public Variables
+'Example:
+Public PTempC 'datalogger temp
+Public AirTempC 'air temp from thermocouple in C
+Public AirTempF ' " in F
+Public MinTemp
+Public MaxTemp
+Public TempDiff ' difference between airtemp and logger temp in C
+Public LightOn As Boolean
+Public ManualLightOn As Boolean
+
+'Define Data Tables.
+DataTable (Temp,True,-1 )
+  Minimum (1,PTempC,FP2,False,False)
+  Maximum (1,PTempC,FP2,False,False)
+  Average (1,AirTempC,FP2,False)
+  Sample (1,AirTempC,FP2)
+  Sample (1,AirTempF,FP2)
+  Sample (1,LightOn,Boolean)
+EndTable 
+
+'Define Subroutines
+Sub (GetAirTemp)
+  TCDiff (AirTempC,1,AutoRange,1,TypeK,PTempC,True ,0,_60Hz,1.0,0)
+EndSub
+  
+Sub CalcF
+  AirTempF = AirTempC * 1.8 + 32
+EndSub
+
+Sub CalcDiff
+  TempDiff = AirTempC - PTempC
+EndSub
+
+Sub TurnLightOn
+  If AirTempF >= MaxTemp Then
+    PortSet (9,1)
+    LightOn = True
+    Else
+    PortSet (9,0)
+      LightOn = False
+  EndIf
+EndSub
+
+'Main Program
+BeginProg
+  MaxTemp = 68
+	Scan (10,Sec,0,0)
+		PanelTemp (PTempC,60)
+		Call GetAirTemp
+		Call CalcF
+		Call CalcDiff
+		Call TurnLightOn
+		'Enter other measurement instructions
+		'Call Output Tables
+		'Example:
+		CallTable Temp
+	NextScan
+EndProg
+
