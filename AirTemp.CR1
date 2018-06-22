@@ -17,6 +17,7 @@ Public PTempC 'datalogger temp
 Public AirTempC 'air temp from thermocouple in C
 Public AirTempF ' " in F
 Public MaxTemp 'Max temp used as trigger to turn light on
+Public MinTemp 'Min temp used as trigger to turn light on
 Public TempDiff ' difference between airtemp and logger temp in C
 Public LightOn As Boolean 'used to indicate whether light should be on or off
 Public ManualLightOn As Boolean 'used as a manual trigger if user wants the light on even if temp isn't over threshold
@@ -51,9 +52,9 @@ EndSub
 
 '_____________________Turn the light on based on the temp threshold______________________________
 Sub TurnLightOn
-  If AirTempF >= MaxTemp Then 'if my temp in degF is greater than or equal to the value I set as my "MaxTemp" then
+  If AirTempF <= MaxTemp AND AirTempF >= MinTemp Then 'if my temp in degF is greater than or equal to the value I set as my "MaxTemp" then
     PortSet (9,1) 'turn the light on. PortSet turns allows the user to turn a "C" port (1-8) or the Switching 12V port (9), to a "high" state (on, 1) or a "low" (off, 0)
-    MaxLightOn = True 'then indicate with a flag that the light is one due to temp reaching the max threshold
+    MaxLightOn = True 'then indicate with a flag that the light is on due to temp reaching the max threshold
     LightOn = True 'indicate that the light is on <- two are necessary for something below, hopefully you'll see why
     Else 'otherwise (AirTempF is less than MaxTemp)
     PortSet (9,0) 'turn the port to a low stat (turn the light off)
@@ -76,8 +77,9 @@ EndSub 'close subroutine
 
 'Main Program
 BeginProg
-  MaxTemp = 68 'initially set the MaxTemp to a value (notice it's outside the "Scan" so it only sets it at the INITIAL compile. Otherwise, the user controls it.
-	Scan (10,Sec,0,0) 'set the scan interval
+  MaxTemp = 80 'initially set the MaxTemp to a value (notice it's outside the "Scan" so it only sets it at the INITIAL compile. Otherwise, the user controls it.
+	MinTemp = 75
+Scan (10,Sec,0,0) 'set the scan interval
 		PanelTemp (PTempC,60) 'PanelTemp is a built in instruction to measure the datalogger's internal temperature
 		Call GetAirTemp 'call the subroutines
 		Call CalcF
