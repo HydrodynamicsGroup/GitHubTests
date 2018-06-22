@@ -35,50 +35,50 @@ EndTable
 'Define Subroutines
 '_________________________Get the Air Temp from the Thermocouple_________________
 Sub (GetAirTemp)
-  TCDiff (AirTempC,1,AutoRange,1,TypeK,PTempC,True ,0,_60Hz,1.0,0)
+  TCDiff (AirTempC,1,AutoRange,1,TypeK,PTempC,True ,0,_60Hz,1.0,0) 'the TCDiff instruction is to take a thermocouple measurement. Right-click "TCDiff" to access the help section/insert function.
 EndSub
 
 '___________________Calculate Temp F from Thermocouple data ________________________  
 Sub CalcF
-  AirTempF = AirTempC * 1.8 + 32
+  AirTempF = AirTempC * 1.8 + 32 'convert the airtemp from the thermocouple to degF. This can also be done in the TCDiff function using the "Multiplier" and "Offset"
 EndSub
 
 '_____________________Calculate difference between Datalogger panel temp and air temp__________________
 Sub CalcDiff
-  TempDiff = AirTempC - PTempC
+  TempDiff = AirTempC - PTempC 'Calculate a difference between the air temp and the datalogger temp.
 EndSub
 
 '_____________________Turn the light on based on the temp threshold______________________________
 Sub TurnLightOn
-  If AirTempF >= MaxTemp Then
-    PortSet (9,1)
-    MaxLightOn = True
-    LightOn = True
-    Else
-    PortSet (9,0)
-    MaxLightOn = False
-    LightOn = False
-  EndIf
-EndSub
+  If AirTempF >= MaxTemp Then 'if my temp in degF is greater than or equal to the value I set as my "MaxTemp" then
+    PortSet (9,1) 'turn the light on. PortSet turns allows the user to turn a "C" port (1-8) or the Switching 12V port (9), to a "high" state (on, 1) or a "low" (off, 0)
+    MaxLightOn = True 'then indicate with a flag that the light is one due to temp reaching the max threshold
+    LightOn = True 'indicate that the light is on <- two are necessary for something below, hopefully you'll see why
+    Else 'otherwise (AirTempF is less than MaxTemp)
+    PortSet (9,0) 'turn the port to a low stat (turn the light off)
+    MaxLightOn = False 'indicate that the max temp threshold is not met/light is off
+    LightOn = False 'indicate the light is off
+  EndIf 'close the if...then statement
+EndSub 'end the subroutine
 
 '_________________________Turn the light on based on the user flipping the switch______________________
 Sub ManLightOn
-  If ManualLightOn = True Then
-    PortSet(9,1)
-    LightOn = True
-  ElseIf ManualLightOn = False AND MaxLightOn = False Then
-    PortSet(9,0)
-    LightOn = False
-  EndIf
-EndSub
+  If ManualLightOn = True Then 'if the user wants to turn the light on
+    PortSet(9,1) 'turn the SW12 port on
+    LightOn = True 'indicate the light is turned on
+  ElseIf ManualLightOn = False AND MaxLightOn = False Then 'if user doesn't want it manually turned on AND the temp hasn't reached the "Max" threshold
+    PortSet(9,0) 'turn the SW12 port off
+    LightOn = False 'indicate the light is off
+  EndIf 'close statement
+EndSub 'close subroutine
   
 
 'Main Program
 BeginProg
-  MaxTemp = 68
-	Scan (10,Sec,0,0)
-		PanelTemp (PTempC,60)
-		Call GetAirTemp
+  MaxTemp = 68 'initially set the MaxTemp to a value (notice it's outside the "Scan" so it only sets it at the INITIAL compile. Otherwise, the user controls it.
+	Scan (10,Sec,0,0) 'set the scan interval
+		PanelTemp (PTempC,60) 'PanelTemp is a built in instruction to measure the datalogger's internal temperature
+		Call GetAirTemp 'call the subroutines
 		Call CalcF
 		Call CalcDiff
 		Call TurnLightOn
@@ -86,7 +86,7 @@ BeginProg
 		'Enter other measurement instructions
 		'Call Output Tables
 		'Example:
-		CallTable Temp
-	NextScan
-EndProg
+		CallTable Temp 'Call the Table defined above.
+	NextScan 'start the next scan (start time of the next scan is based on the interval defined above
+ EndProg 'end the program
 
