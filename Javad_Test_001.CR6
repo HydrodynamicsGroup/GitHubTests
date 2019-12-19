@@ -1,0 +1,31 @@
+'CR6 Series
+'Created by Short Cut (4.0)
+
+'Declare Variables and Units
+Public BattV
+Public PTemp_C
+Public SW12State As Boolean
+
+Units BattV=Volts
+Units PTemp_C=Deg C
+
+'Main Program
+BeginProg
+	'Main Scan
+	Scan(1,Sec,0,0)
+		'Default CR6 Datalogger Battery Voltage measurement 'BattV'
+		Battery(BattV)
+		'Default CR6 Datalogger Wiring Panel Temperature measurement 'PTemp_C'
+		PanelTemp(PTemp_C,60)
+		'SW12 Timed Control
+		'Turn ON SW12 between Monday 0015 hours and Tuesday 0015 hours
+		If TimeIsBetween(87300,173700,604800,Sec) Then
+			SW12State=True
+		Else
+			SW12State=False
+		EndIf
+		'Set SW12-1 to the state of 'SW12State' variable
+		SW12(1,SW12State,0)
+		'Call Data Tables and Store Data
+	NextScan
+EndProg
