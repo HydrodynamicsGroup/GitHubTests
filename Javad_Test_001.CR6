@@ -18,8 +18,8 @@ BeginProg
 		'Default CR6 Datalogger Wiring Panel Temperature measurement 'PTemp_C'
 		PanelTemp(PTemp_C,60)
 		'SW12 Timed Control
-		'Turn ON SW12 between Monday 0015 hours and Tuesday 0015 hours
-		If TimeIsBetween(87300,173700,604800,Sec) Then
+		'Turn ON SW12 between 0 and 86400 seconds, 604800 seconds after the program was last compiled on the logger and at an interval of 604800 seconds thereafter
+		If TimeIsBetween(0,86400,604800,Sec) Then
 			SW12State=True
 		Else
 			SW12State=False
